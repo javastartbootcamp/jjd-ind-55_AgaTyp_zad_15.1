@@ -2,7 +2,7 @@ package pl.javastart.task;
 
 import java.util.Comparator;
 
-public class Person implements Comparable<Person> {
+public class Person {
     private String firsName;
     private String lastName;
     private int score;
@@ -65,17 +65,4 @@ public class Person implements Comparable<Person> {
         this.score = score;
     }
 
-    @Override
-    public int compareTo(Person o) {
-        if (score > o.score) {
-            return 1;
-        } else if (score < o.score) {
-            return -1;
-        }
-        int lastNameCompare = lastName.compareTo(o.getLastName());
-        if (lastNameCompare != 0) {
-            return lastNameCompare;
-        }
-        return firsName.compareTo(o.getFirsName());
-    }
 }

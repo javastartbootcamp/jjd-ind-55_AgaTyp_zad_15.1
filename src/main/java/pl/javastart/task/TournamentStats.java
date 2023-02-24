@@ -5,12 +5,33 @@ import java.util.*;
 
 public class TournamentStats {
 
+    private static final int SORT_BY_NAME = 1;
+    private static final int SORT_BY_LASTNAME = 2;
+    private static final int SORT_BY_SCORE = 3;
+    private static final int SORT_ASC = 1;
+    private static final int SORT_DESC = 2;
     private ArrayList<Person> participantsList = new ArrayList<>();
     private File resultFile = new File("stats.csv");
 
     void run(Scanner scanner) {
         // tutaj dodaj swoje rozwiązanie
         // użyj przekazanego scannera do wczytywania wartości
+        loadParticipants(scanner);
+        if (participantsList.size() > 0) {
+            Comparator<Person> comparator = chooseSortingParameter(scanner);
+            chooseOrderAndSort(scanner, comparator);
+            writeStats();
+        } else {
+            System.out.println("Na liście nie ma uczestników.");
+        }
+
+    }
+
+    private void writeStats() {
+        WriteData.saveList(participantsList, resultFile);
+    }
+
+    private void loadParticipants(Scanner scanner) {
         String input = "";
         while (!Objects.equals(input.toUpperCase(), "STOP")) {
             System.out.println("Podaj wynik kolejnego gracza (lub stop):");
@@ -18,41 +39,31 @@ public class TournamentStats {
             addPerson(input);
 
         }
-        if (participantsList.size() > 0) {
-            chooseSortingParameter(scanner);
-            chooseOrderAndWriteStats(scanner);
-        } else {
-            System.out.println("Na liście nie ma uczestników.");
-        }
-
     }
 
-    private void chooseOrderAndWriteStats(Scanner scanner) {
-        System.out.println("Sortować rosnąco czy malejąco? (1 - rosnąco, 2 - malejąco)");
+    private void chooseOrderAndSort(Scanner scanner, Comparator<Person> comparator) {
+        System.out.printf("Sortować rosnąco czy malejąco? (%d - rosnąco, %d - malejąco)\n", SORT_ASC, SORT_DESC);
         switch (scanner.nextInt()) {
-            case 1:
-                WriteData.saveList(participantsList, resultFile);
+            case SORT_ASC:
+                participantsList.sort(comparator);
                 break;
-            case 2:
-                Collections.reverse(participantsList);
-                WriteData.saveList(participantsList, resultFile);
+            case SORT_DESC:
+                participantsList.sort(comparator.reversed());
                 break;
         }
     }
 
-    private void chooseSortingParameter(Scanner scanner) {
-        System.out.println("Po jakim parametrze posortować? (1 - imię, 2 - nazwisko, 3 - wynik)");
+    private Comparator<Person> chooseSortingParameter(Scanner scanner) {
+        System.out.printf("Po jakim parametrze posortować? (%d - imię, %d - nazwisko, %d - wynik)\n", SORT_BY_NAME, SORT_BY_LASTNAME, SORT_BY_SCORE);
         switch (scanner.nextInt()) {
-            case 1:
-                participantsList.sort(new Person.FirstNameComparator());
-                break;
-            case 2:
-                participantsList.sort(new Person.LastNameComparator());
-                break;
-            case 3:
-                participantsList.sort(new Person.ScoreNameComparator());
-                break;
+            case SORT_BY_NAME:
+                return new Person.FirstNameComparator();
+            case SORT_BY_LASTNAME:
+                return new Person.LastNameComparator();
+            case SORT_BY_SCORE:
+                return new Person.ScoreNameComparator();
         }
+        return null;
     }
 
     private void addPerson(String input) {
